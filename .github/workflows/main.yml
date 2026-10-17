@@ -1,4 +1,5 @@
 
+          
 name: Build Gym Exercise Library APK
 
 on:
@@ -7,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -15,7 +15,6 @@ jobs:
       - name: Extract Android project
         run: |
           unzip -o Gym_Exercise_Library_Android_Cloud_Build.zip -d extracted
-          find extracted -type f -name "settings.gradle*" -print
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -27,6 +26,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
+
+      - name: Fix Java and Kotlin targets
+        run: |
+          find extracted -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g; s/jvmTarget = "1.8"/jvmTarget = "17"/g' {} +
 
       - name: Build APK
         run: |
@@ -41,4 +44,4 @@ jobs:
           name: Gym-Exercise-Library-APK
           path: extracted/**/build/outputs/apk/debug/*.apk
           if-no-files-found: error
-          
+
