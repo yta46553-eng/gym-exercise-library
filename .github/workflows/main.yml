@@ -1,5 +1,4 @@
 
-          
 name: Build Gym Exercise Library APK
 
 on:
@@ -8,6 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -15,6 +15,7 @@ jobs:
       - name: Extract Android project
         run: |
           unzip -o Gym_Exercise_Library_Android_Cloud_Build.zip -d extracted
+          find extracted -type f \( -name "settings.gradle" -o -name "settings.gradle.kts" \) -print
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -29,11 +30,12 @@ jobs:
 
       - name: Fix Java and Kotlin targets
         run: |
-          find extracted -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g; s/jvmTarget = "1.8"/jvmTarget = "17"/g' {} +
+          find extracted -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -print
+          find extracted -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g; s/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g; s/jvmTarget = "1.8"/jvmTarget = "17"/g; s/targetCompatibility = JavaVersion.VERSION_1_8/targetCompatibility = JavaVersion.VERSION_17/g; s/sourceCompatibility = JavaVersion.VERSION_1_8/sourceCompatibility = JavaVersion.VERSION_17/g' {} +
 
       - name: Build APK
         run: |
-          PROJECT_DIR="$(dirname "$(find extracted -type f -name 'settings.gradle*' | head -n 1)")"
+          PROJECT_DIR="$(dirname "$(find extracted -type f \( -name 'settings.gradle' -o -name 'settings.gradle.kts' \) | head -n 1)")"
           echo "Project directory: $PROJECT_DIR"
           cd "$PROJECT_DIR"
           gradle assembleDebug
@@ -44,4 +46,5 @@ jobs:
           name: Gym-Exercise-Library-APK
           path: extracted/**/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
 
